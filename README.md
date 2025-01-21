@@ -178,3 +178,9 @@ Seams to be TurnSignal control
 | `0x3A` | `0x43`| `0x7F` | Right turn signal (Sent every time the indicator lights up) |
 | `0x5F` | `0x32`| `0x7F` | Flash hazard lights (Sent once when locking the car) |
 | `0x7F` | `0x32`| `0x7F` | Flash hazard lights twice (Sent once when unlocking the car) |
+
+## 0x500 Voltage
+*Byte 1*: 0x00  
+*Byte 2*: Volt
+
+Volt: **0x5C** = (92 + 28) / 10 = **12**  
