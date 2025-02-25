@@ -90,9 +90,9 @@ Speed: **0x04E5** = 1253 / _139_ = **9 km/h**
 
 ## 0x110 Distance traveled
 Traveled distance per driven wheel, incrementing  
-*Byte 1*: Unknown, 4 differen values are seen  
-*Byte 2+3*: Traveled Distance for front left wheel  
-*Byte 4+5*: Traveled Distance for front right wheel  
+*Byte 0*: Unknown, 4 differen values are seen  
+*Byte 1+2*: Traveled Distance for front left wheel  
+*Byte 3+4*: Traveled Distance for front right wheel  
 One increment is _1.5748 cm_  
 Example: `00:B4:92:B4:14`  
 Left: **0xB492** = 46226 * _1.5748_ = 72796.7048 cm = **727.96 m**  
@@ -101,9 +101,9 @@ A full cycle of the 16 bit integer are 1032 m.
 
 
 ## 0x130 Fuel injection
-*Byte 1*: Unknown, 4 differen values are seen  
-*Byte 2+3*: Increments every fuel injection  
-*Byte 4-7*: Always `0x00`  
+*Byte 0*: Unknown, 4 differen values are seen  
+*Byte 1+2*: Increments every fuel injection  
+*Byte 3-6*: Always `0x00`  
 At my 1.6l Engine, one increment is _0.03054 ml_  
 Example: `00:13:A6:00:00:00:00`  
 Injected: **0x13A6** = 5030 * _0.03054_ = **153,62 ml**  
@@ -111,31 +111,31 @@ A full cycle of the 16 bit integer are about 2 liters.
 
 
 ## 0x145 Engine Data
-Byte 1:  
+Byte 0:  
 * `0x00`: Engine Running  
 * `0x20`: Ignition ON, engine not running  
 * `0x40`/`0x60`: Engine start  
 
-Byte 2:  
+Byte 1:  
 * `0x00`: Engine off
 * `0x01`: Engine running  
 * `0x80`/`0x81`: Engine starting  
 
-Byte 3:  
+Byte 2:  
 * `0x01`: Engine off  
 * `0x10`: Engine running  
 
-Byte 4: Coolant (°C _- 40_)  
+Byte 3: Coolant (°C _- 40_)  
 
-Byte 5:  
+Byte 4:  
 * `0x00`: Engine off  
 * `0xA0`: Engine running  
 
-Byte 6: 
+Byte 5: 
 * `0x04`: Cruisecontrol inactive 
 * `0x06`: Cruisecontrol active
 
-Byte 7+8: Always `0x00`  
+Byte 6+7: Always `0x00`  
 Example: `20:00:01:26:00:04:00:00`  
 Coolant: **0x28** = 38 - _40_ = **-2 °C**  
 
@@ -146,41 +146,42 @@ Coolant: **0x28** = 38 - _40_ = **-2 °C**
 * `0x72`: key position 1   
 * `0x74`: key position 2   
 * `0x54`: key position 2 through 3 sec   
+
 *Byte 1+3*: Always `0x00`  
 
 
 ## 0x175 Colums Switches
-*Byte 1,2,4,5,7,8*: No other values than `0x00` seen so far.  
-*Byte 3*: Left column switch (Turn signal):  
+*Byte 0,1,3,4,5,7*: No other values than `0x00` seen so far.  
+*Byte 2*: Left column switch (Turn signal):  
 * `0x01`: half pressed down  
 * `0x02`: half pressed up  
-* `0x03`: fully pressed  down  
+* `0x03`: fully pressed down  
 * `0x04`: fully pressed up  
 
 *Byte 6*: Right columns switch (Whiper control):  
 
 
 ## 0x235 LED Brightness
-*Byte 1*: Always `0x00`  
-*Byte 2*: LED Brightness from 0x01 to 0xFF. 0x00 is off / day mode (Instrument at full Brightness)  
+*Byte 0*: Always `0x00`  
+*Byte 1*: LED Brightness from 0x01 to 0xFF. 0x00 is off / day mode (Instrument at full Brightness)  
 
 
 ## 0x375 Fuel Level
-*Byte 1*: Always `0x00`  
-*Byte 2*: Fuel Level, value depends on Sensor  
+*Byte 0*: Always `0x00`  
+*Byte 1*: Fuel Level, value depends on Sensor  
 Example: `00:A0`  
 Fuel: **0xA0** = 94 - ( _160_ / 2 ) = **14.0l**  
 
 ## 0x440 Time
-*Byte 1*: Hours  
-*Byte 2*: Minutes  
-*Byte 3*: Seconds / 4  
+*Byte 0*: Hours  
+*Byte 1*: Minutes  
+*Byte 2*: Seconds / 4  
 
 | **`440`** | **`80:90:B0:00:00:78:10:13`** | **System Time**     
 ## 0x260
 Seams to be TurnSignal control  
 
-| Byte1 | Byte2 | Byte3 | Meaning |
+| Byte0 | Byte1 | Byte2 | Meaning |
 | --- | --- | --- | --- |
 | `0x00` | `0x00`| `0x00` | Turn signals off (Sent twice when indicator is turned off) |
 | `0x25` | `0x43`| `0x7F` | Left turn signal (Sent every time the indicator lights up) |
@@ -189,7 +190,7 @@ Seams to be TurnSignal control
 | `0x7F` | `0x32`| `0x7F` | Flash hazard lights twice (Sent once when unlocking the car) |
 
 ## 0x500 Voltage
-*Byte 1*: 0x00  
-*Byte 2*: Volt
+*Byte 0*: 0x00  
+*Byte 1*: Volt
 
 Volt: **0x5C** = (92 + 28) / 10 = **12**  
