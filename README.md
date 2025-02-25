@@ -12,7 +12,7 @@ LCD into IPC Astra H. Arduino sketch
 |   `068`   |   `01:20:61:D0:00:00`         |   ???                  | ?      | *0x01*            | *0x20*            | *0x61*            | *0xD0*            | *0x00*            | *0x00*            |
 |   `090`   |   `00:00:71:00:00:00`         |   ???                  | ?      | *0x00*            | *0x00*            | ? (2)             | *0x00*            | *0x00*            | *0x00*            |
 | **`100`** |                               | **Bus Wakeup**         | Unlock |
-| **`108`** | **`23:20:98:00:04:E5:00:00`** | **Speed/RPM**          |   50ms | ? (10)            | **Speed**         | **Speed**         | *0x00*            | **RPM**           | **RPM**           | *0x00*            | *0x00*            |
+| **`108`** | **`23:20:98:00:04:E5:00:00`** | **Speed/RPM**          |   50ms | ? (10)            | **RPM**         | **RPM**         | **Speed**       | **Speed**           | *0x00*           | *0x00*            | *0x00*            |
 | **`110`** | **`00:B4:92:B4:14`**          | Distance Traveled      |  100ms | ? (4)             | **Wheel FL**      | **Wheel FL**      | **Wheel FR**      | **Wheel FR**      |
 |   `115`   |   `0E`                        | Break Switch or Light  |~1000ms | ? (9)             |
 |   `11A`   |   `C0:00:40:80:01:00:00`      |   ???                  |~1500ms | *0xC0*            | *0x00*            | *0x40*            | ? (2)             | *0x01*            | *0x00*            | *0x00*            |
@@ -21,7 +21,7 @@ LCD into IPC Astra H. Arduino sketch
 |   `145`   |   `20:00:01:28:00:04:00:00`   | Engine                 |  100ms | Status            | Status            | Status            | **Coolant**       | Status            | **CruseControl**            | *0x00*            | *0x00*            |
 |   `155`   |   `00:20`                     |   ???                  |  100ms | *0x00*            | ? (18)            |
 |   `160`   |   `02:10:C8:03`               |   ???                  | ?      | *0x02*            | ? (3)             | *0xC8*            | *0x03*            |
-|   `170`   |   `20:00:00:00`               |   ???                  | ?      | ? (8)             | ? (2)             | 0x03=KeyIn             | *0x00*            |
+|   `170`   |   `70:00:00:00`               |   **IPC**                  | ?      | **Ignition**             | *0x00*             | *0x00*             | *0x00*            |
 |   `175`   |   `00:00:00:00:00:00:00:00`   | **Column switch**      | Event  | ? (4)             | ? (5)             | ? (6)             | ? (2)             | *0x00*            | ? (3)             | *0x00*            | ? (2)             |
 |   `188`   |   `01:FF:E0`                  |   ???                  | ?      | ? (3)             | ? (72)            | ? (17)            |
 | **`190`** | **`00:00:F9:0B:00:01:17`**    | **Mileage**            | 1000ms | *0x00*            | *0x00*            | **Mileage**       | **Mileage**       | **Mileage**       | *0x01*            | ? (3)             |
@@ -54,7 +54,6 @@ LCD into IPC Astra H. Arduino sketch
 |   `520`   |   `00:80:00:00:00:00:00:00`   |   ???                  | 1000ms | *0x00*            | *0x80*            | *0x00*            | *0x00*            | *0x00*            | *0x00*            | *0x00*            | *0x00*            |
 | **`530`** | **`11:11:34:34:38:3A:28:29`** | **TPMS**               | 1000ms | State F           | State R           | Bar FL            | Bar FR            | Bar RL            | Bar RR            | 0x28=OK           | 0x29=ON           |
 |   `531`   |   `10:70:32:11:11`            |   ???                  | ?      | ? (12)            | ? (21)            | ? (12)            | ? (48)            | ? (3)             |
-| **`555`** | **`08:09:B1:B2`**             | **Reseted Trip**       | Request| *? (08)*          | *? (09)*          | *Trip*            | *Trip*            |                   |
 |   `5E8`   |   `81:00:00:74:10:00:00:00`   |   ???                  | ?      | *0x81*            | *0x00*            | *0x00*            | ? (35)            | *0x10*            | *0x00*            | *0x00*            | *0x00*            |
 |   `625`   |   `00:08:00:00:00:00:00:00`   |   ???                  | ?      | ? (2)             | ? (5)             | ? (6)             | *0x00*            | *0x00*            | *0x00*            | *0x00*            | *0x00*            |
 |   `626`   |   `00:11:00:00:00:00:00:00`   |   ???                  | ?      | ? (2)             | *0x11*            | *0x00*            | *0x00*            | *0x00*            | *0x00*            | *0x00*            | *0x00*            |
@@ -79,14 +78,14 @@ This messages is sent when the bus is offline and will wake up all attached devi
 
 ## 0x108 Speed and RPM
 This are some data from the engine  
-*Byte 1*: Unknown, 10 different values are seen here.  
-*Byte 2+3*: Speed (Divide _by 128_)  
-*Byte 4*: Always `0x00`  
-*Byte 5+6*: RPM  
-*Byte 6+7*: Always `0x00`   
+*Byte 0*: Unknown, 10 different values are seen here.  
+*Byte 1+2*: RPM (Divide _by 4_)  
+*Byte 3*: Always `0x00`  
+*Byte 4+5*: Speed (Divide _by 139_)  
+*Byte 6+7*: Always `0x00`  
 Example: `23:20:98:00:04:E5:00:00`  
-Speed: **0x2098** = 8344 / _128_ = **65.1875 km/h**  
-RPM: **0x04E5** = **1253 rpm**  
+RPM: **0x2098** = 8344 / _4_ = **2086 rpm**  
+Speed: **0x04E5** = 1253 / _139_ = **9 km/h**  
 
 
 ## 0x110 Distance traveled
@@ -141,6 +140,15 @@ Example: `20:00:01:26:00:04:00:00`
 Coolant: **0x28** = 38 - _40_ = **-2 °C**  
 
 
+## 0x170 IPC
+*Byte 0*: Ignition  
+* `0x70`: key position 0  
+* `0x72`: key position 1   
+* `0x74`: key position 2   
+* `0x54`: key position 2 through 3 sec   
+*Byte 1+3*: Always `0x00`  
+
+
 ## 0x175 Colums Switches
 *Byte 1,2,4,5,7,8*: No other values than `0x00` seen so far.  
 *Byte 3*: Left column switch (Turn signal):  
@@ -185,16 +193,3 @@ Seams to be TurnSignal control
 *Byte 2*: Volt
 
 Volt: **0x5C** = (92 + 28) / 10 = **12**  
-
-## 0x555 Reseted Trip
-*Byte 1*: 0x08 - Unknown
-*Byte 2*: 0x09 - Unknown
-*Byte 3+4*: Trip
-
-Trip: **0xB1B2** = 45490/10 = **4549 km**
-
-Trip km Value request:
-request 0x255 - 08 03 AA 01 09 00 00 00 00
-
-Response:
-0x555 - 08 09 B1 B2
