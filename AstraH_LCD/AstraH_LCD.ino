@@ -46,9 +46,10 @@ int coolant = 0;
 float voltage = 0;
 uint16_t distance = 0;
 uint32_t odometr = 0;
-String gear = "N";
+String gear = "--";
 uint32_t timer1;
 uint32_t timer2;
+uint32_t timer3;
 bool screen_on = true;
 byte door_rear = 0x00;
 byte door_front = 0x00;
@@ -57,6 +58,11 @@ byte washwater = 0x00;
 float fuel = 0.0;
 float wheel_l = 0.0;
 float wheel_r = 0.0;
+
+uint32_t rpm_count = 0;
+uint32_t gear_count = 0;
+uint32_t rpm_ref = 0;
+uint32_t gear_ref = 0;
 
 void setup(void) {
   ad.bcfc = 16;     // bcfc задние закрыты перед закрыт
@@ -81,7 +87,8 @@ void setup(void) {
 
   tft.fillScreen(BG_COLOR);
   digitalWrite(TFT_BL, HIGH);
-  tft.drawRect(10, 40, 220, 180, WHITE);
+  tft.drawLine(10, 220, 228, 220, WHITE);
+  tft.drawRect(10, 40, 220, 220, WHITE); //180
 
   setCoolant(String(coolant));
   setVoltage(String(voltage, 1));
@@ -100,7 +107,7 @@ void setup(void) {
 }
 
 void loop() {
-  if (millis() - timer1 >= 5000) {
+  if (millis() - timer1 >= 5000) {  // запрос показаний Distance и сброс показаний 
     timer1 = millis();               // сброс таймера
 
     // Создаем структуру can_frame для отправки
@@ -111,13 +118,16 @@ void loop() {
     memcpy(frame.data, data, sizeof(data));
     can.sendMessage(&frame);
   }
-  if (millis() - timer2 >= 500) {
+  if (millis() - timer2 >= 300) {
     timer2 = millis();               // сброс таймера
     setCoolant(String(coolant));
     setVoltage(String(voltage, 1));
     setGear(gear);
     setDistance(String(distance/10.0, 1));
     setOdometr(String(odometr));
+
+    setWheelL(String(wheel_l, 2));
+    setWheelR(String(wheel_r, 2));
 
     if (screen == "RPM") {
       setSpeed(String(speed));
@@ -131,6 +141,24 @@ void loop() {
       tft.sleepDisplay(true);
       digitalWrite(TFT_BL, LOW);
     }
+  }
+
+  if (millis() - timer3 >= 3000) {  // Сброс показаний коды по которым не приходили 3 сек
+    timer3 = millis();               // сброс таймера
+    if (rpm_ref == rpm_count) {
+      speed = 0;
+      rpm = 0;
+    }
+    rpm_ref = rpm_count;
+    /*
+    coolant = 0;
+    voltage = 0;
+    distance = 0;
+    odometr = 0;
+    gear = "--";
+    float fuel = 0.0;
+    float wheel_l = 0.0;
+    float wheel_r = 0.0;*/
   }
 
   if (can.readMessage(&canMsg) == MCP2515::ERROR_OK) {
@@ -153,6 +181,7 @@ void loop() {
       Serial.println("Start CAN");
     }
     if (canMsg.can_id == 0x108) {
+      rpm_count++;
       speed = ((canMsg.data[4]<<8) | canMsg.data[5])/139;
       rpm = ((canMsg.data[1]<<8) | canMsg.data[2])/4; // 108 8 10:C:A4:0:0:0:0:0
     }
@@ -172,15 +201,14 @@ void loop() {
     if (canMsg.can_id == 0x11A) { // Передача
       if (canMsg.data[2] == 0x88) {
         gear = "R";
-      }
-      if (canMsg.data[2] == 0x89) {
+      } else if (canMsg.data[2] == 0x89) {
         gear = "N";
-      }
-      if (canMsg.data[2] == 0x8B) {
+      } else if (canMsg.data[2] == 0x8B) {
         gear = "A1";
-      }
-      if (canMsg.data[2] == 0x8F) {
+      } else if (canMsg.data[2] == 0x8F) {
         gear = "M1";
+      } else {
+        gear = "--";
       }
     }
     if (canMsg.can_id == 0x190) { // Пробег
@@ -288,6 +316,22 @@ void drawPicture(uint32_t address) {
   }
 }
 
+void setWheelL(String text) {
+  tft.setCursor(20, 234);
+  tft.setTextSize(2);
+  tft.setTextColor(WHITE, BG_COLOR);
+  tft.setTextWrap(false);
+  tft.println(addSpaceAfter(text + "m", 5));
+}
+
+void setWheelR(String text) {
+  tft.setCursor(138, 234);
+  tft.setTextSize(2);
+  tft.setTextColor(WHITE, BG_COLOR);
+  tft.setTextWrap(false);
+  tft.println(addSpaceBefore(text + "m", 7));
+}
+
 void setCoolant(String text) {
   tft.setCursor(10, 12);
   tft.setTextSize(2);
@@ -305,24 +349,24 @@ void setVoltage(String text) {
 }
 
 void setGear(String text) {
-  tft.setCursor(10, 245);
-  tft.setTextSize(8);
+  tft.setCursor(10, 270);
+  tft.setTextSize(6);
   tft.setTextColor(WHITE, BG_COLOR);
   tft.setTextWrap(false);
   tft.println(addSpaceAfter(text, 2));
 }
 
 void setDistance(String text) {
-  tft.setCursor(107, 245);
-  tft.setTextSize(3);
+  tft.setCursor(147, 270);
+  tft.setTextSize(2);
   tft.setTextColor(WHITE, BG_COLOR);
   tft.setTextWrap(false);
   tft.println(addSpaceBefore(text, 7));
 }
 
 void setOdometr(String text) {
-  tft.setCursor(107, 280);
-  tft.setTextSize(3);
+  tft.setCursor(147, 295);
+  tft.setTextSize(2);
   tft.setTextColor(WHITE, BG_COLOR);
   tft.setTextWrap(false);
   tft.println(addSpaceBefore(text, 7));
